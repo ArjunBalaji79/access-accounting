@@ -1,0 +1,57 @@
+# GPU specifications for ECA computation
+# Source: NVIDIA official datasheets
+#
+# CRITICAL CONVENTION (from paper):
+# All FLOP/s values are DENSE BF16, SXM form factor, NO SPARSITY.
+# Sparsity is recorded for reference but excluded from ECA.
+# Cite exact datasheet column used.
+
+- name: H100_SXM5
+  full_name: "NVIDIA H100 SXM5 80GB"
+  form_factor: SXM
+  memory_gb: 80
+  memory_type: HBM3
+  # Dense BF16 peak: 989.5 TFLOP/s (verify against current datasheet)
+  peak_tflops_bf16_dense: 989.5
+  # Sparse BF16 peak: 1979 TFLOP/s (NOT used in ECA)
+  peak_tflops_bf16_sparse: 1979.0
+  tdp_watts: 700
+  datasheet_url: "https://www.nvidia.com/en-us/data-center/h100/"
+  notes: "Used in AWS p5, GCP a3-highgpu instances"
+
+- name: A100_SXM4
+  full_name: "NVIDIA A100 SXM4 80GB"
+  form_factor: SXM
+  memory_gb: 80
+  memory_type: HBM2e
+  # Dense BF16 peak: 312 TFLOP/s (verify against current datasheet)
+  peak_tflops_bf16_dense: 312.0
+  # Sparse BF16 peak: 624 TFLOP/s (NOT used in ECA)
+  peak_tflops_bf16_sparse: 624.0
+  tdp_watts: 400
+  datasheet_url: "https://www.nvidia.com/en-us/data-center/a100/"
+  notes: "Used in AWS p4d, GCP a2-highgpu instances"
+
+# Uncomment and fill if expanding to newer GPUs:
+#
+# - name: H200_SXM
+#   full_name: "NVIDIA H200 SXM 141GB"
+#   form_factor: SXM
+#   memory_gb: 141
+#   memory_type: HBM3e
+#   peak_tflops_bf16_dense: 989.5  # Same compute die as H100
+#   peak_tflops_bf16_sparse: 1979.0
+#   tdp_watts: 700
+#   datasheet_url: "https://www.nvidia.com/en-us/data-center/h200/"
+#   notes: "Same FLOP/s as H100; advantage is memory capacity/bandwidth"
+#
+# - name: B200_SXM
+#   full_name: "NVIDIA B200 SXM 192GB"
+#   form_factor: SXM
+#   memory_gb: 192
+#   memory_type: HBM3e
+#   peak_tflops_bf16_dense: 2250.0  # VERIFY — Blackwell gen
+#   peak_tflops_bf16_sparse: 4500.0
+#   tdp_watts: 1000
+#   datasheet_url: "https://www.nvidia.com/en-us/data-center/b200/"
+#   notes: "Blackwell architecture; check cloud availability"

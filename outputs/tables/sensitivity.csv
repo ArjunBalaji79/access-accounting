@@ -1,0 +1,121 @@
+normalization_method,country_iso,country_name,provider,gpu_class,eca_scenario_a,eca_scenario_b_mid,runs_per_budget,ratio_to_usa
+ppp,USA,United States,aws,H100_SXM5,2968.5,2968.5,3.53,1.0
+ppp,USA,United States,aws,A100_SXM4,2808.0,2808.0,9.42,1.0
+ppp,USA,United States,gcp,H100_SXM5,2968.5,2968.5,3.64,1.0
+ppp,USA,United States,gcp,A100_SXM4,2808.0,2808.0,9.45,1.0
+ppp,DEU,Germany,aws,H100_SXM5,1979.0,1979.0,2.75,0.667
+ppp,DEU,Germany,aws,A100_SXM4,2184.0,2184.0,7.34,0.778
+ppp,DEU,Germany,gcp,H100_SXM5,1979.0,1979.0,2.84,0.667
+ppp,DEU,Germany,gcp,A100_SXM4,2184.0,2184.0,7.37,0.778
+ppp,JPN,Japan,aws,H100_SXM5,1979.0,1979.0,2.44,0.667
+ppp,JPN,Japan,aws,A100_SXM4,1872.0,1872.0,6.5,0.667
+ppp,JPN,Japan,gcp,H100_SXM5,1979.0,1979.0,2.28,0.667
+ppp,JPN,Japan,gcp,A100_SXM4,1560.0,1560.0,5.92,0.556
+ppp,GBR,United Kingdom,aws,H100_SXM5,1979.0,1979.0,2.79,0.667
+ppp,GBR,United Kingdom,aws,A100_SXM4,2184.0,2184.0,7.44,0.778
+ppp,GBR,United Kingdom,gcp,H100_SXM5,1979.0,1979.0,2.87,0.667
+ppp,GBR,United Kingdom,gcp,A100_SXM4,2184.0,2184.0,7.46,0.778
+ppp,IND,India,aws,H100_SXM5,0.0,0.0,0.92,0.0
+ppp,IND,India,aws,A100_SXM4,624.0,312.0,2.45,0.222
+ppp,IND,India,gcp,H100_SXM5,0.0,0.0,0.9,0.0
+ppp,IND,India,gcp,A100_SXM4,624.0,312.0,2.34,0.222
+ppp,BRA,Brazil,aws,H100_SXM5,494.8,247.4,1.38,0.167
+ppp,BRA,Brazil,aws,A100_SXM4,936.0,468.0,3.67,0.333
+ppp,BRA,Brazil,gcp,H100_SXM5,989.5,494.8,1.42,0.333
+ppp,BRA,Brazil,gcp,A100_SXM4,936.0,468.0,3.68,0.333
+ppp,ARE,United Arab Emirates,aws,H100_SXM5,1979.0,989.5,2.19,0.667
+ppp,ARE,United Arab Emirates,aws,A100_SXM4,1560.0,780.0,5.84,0.556
+ppp,ARE,United Arab Emirates,gcp,H100_SXM5,1979.0,989.5,2.25,0.667
+ppp,ARE,United Arab Emirates,gcp,A100_SXM4,1560.0,780.0,5.86,0.556
+ppp,SGP,Singapore,aws,H100_SXM5,1979.0,989.5,2.05,0.667
+ppp,SGP,Singapore,aws,A100_SXM4,1560.0,780.0,5.46,0.556
+ppp,SGP,Singapore,gcp,H100_SXM5,989.5,494.8,1.96,0.333
+ppp,SGP,Singapore,gcp,A100_SXM4,1560.0,780.0,5.1,0.556
+ppp,NGA,Nigeria,aws,H100_SXM5,0.0,0.0,0.71,0.0
+ppp,NGA,Nigeria,aws,A100_SXM4,312.0,156.0,1.88,0.111
+ppp,NGA,Nigeria,gcp,H100_SXM5,0.0,0.0,0.73,0.0
+ppp,NGA,Nigeria,gcp,A100_SXM4,312.0,156.0,1.89,0.111
+ppp,CHN,China,aws,H100_SXM5,0.0,0.0,1.48,0.0
+ppp,CHN,China,aws,A100_SXM4,0.0,0.0,3.95,0.0
+ppp,CHN,China,gcp,H100_SXM5,0.0,0.0,1.53,0.0
+ppp,CHN,China,gcp,A100_SXM4,0.0,0.0,3.97,0.0
+gdp_per_capita,USA,United States,aws,H100_SXM5,2968.5,2968.5,3.53,1.0
+gdp_per_capita,USA,United States,aws,A100_SXM4,2808.0,2808.0,9.42,1.0
+gdp_per_capita,USA,United States,gcp,H100_SXM5,2968.5,2968.5,3.64,1.0
+gdp_per_capita,USA,United States,gcp,A100_SXM4,2808.0,2808.0,9.45,1.0
+gdp_per_capita,DEU,Germany,aws,H100_SXM5,1979.0,1979.0,2.33,0.667
+gdp_per_capita,DEU,Germany,aws,A100_SXM4,1872.0,1872.0,6.21,0.667
+gdp_per_capita,DEU,Germany,gcp,H100_SXM5,1979.0,1979.0,2.4,0.667
+gdp_per_capita,DEU,Germany,gcp,A100_SXM4,1872.0,1872.0,6.24,0.667
+gdp_per_capita,JPN,Japan,aws,H100_SXM5,989.5,989.5,1.5,0.333
+gdp_per_capita,JPN,Japan,aws,A100_SXM4,936.0,936.0,3.99,0.333
+gdp_per_capita,JPN,Japan,gcp,H100_SXM5,989.5,989.5,1.4,0.333
+gdp_per_capita,JPN,Japan,gcp,A100_SXM4,936.0,936.0,3.64,0.333
+gdp_per_capita,GBR,United Kingdom,aws,H100_SXM5,1979.0,1979.0,2.16,0.667
+gdp_per_capita,GBR,United Kingdom,aws,A100_SXM4,1560.0,1560.0,5.75,0.556
+gdp_per_capita,GBR,United Kingdom,gcp,H100_SXM5,1979.0,1979.0,2.22,0.667
+gdp_per_capita,GBR,United Kingdom,gcp,A100_SXM4,1560.0,1560.0,5.77,0.556
+gdp_per_capita,IND,India,aws,H100_SXM5,0.0,0.0,0.11,0.0
+gdp_per_capita,IND,India,aws,A100_SXM4,0.0,0.0,0.29,0.0
+gdp_per_capita,IND,India,gcp,H100_SXM5,0.0,0.0,0.11,0.0
+gdp_per_capita,IND,India,gcp,A100_SXM4,0.0,0.0,0.28,0.0
+gdp_per_capita,BRA,Brazil,aws,H100_SXM5,0.0,0.0,0.39,0.0
+gdp_per_capita,BRA,Brazil,aws,A100_SXM4,312.0,156.0,1.05,0.111
+gdp_per_capita,BRA,Brazil,gcp,H100_SXM5,0.0,0.0,0.41,0.0
+gdp_per_capita,BRA,Brazil,gcp,A100_SXM4,312.0,156.0,1.05,0.111
+gdp_per_capita,ARE,United Arab Emirates,aws,H100_SXM5,1979.0,989.5,2.18,0.667
+gdp_per_capita,ARE,United Arab Emirates,aws,A100_SXM4,1560.0,780.0,5.82,0.556
+gdp_per_capita,ARE,United Arab Emirates,gcp,H100_SXM5,1979.0,989.5,2.25,0.667
+gdp_per_capita,ARE,United Arab Emirates,gcp,A100_SXM4,1560.0,780.0,5.84,0.556
+gdp_per_capita,SGP,Singapore,aws,H100_SXM5,1979.0,989.5,2.9,0.667
+gdp_per_capita,SGP,Singapore,aws,A100_SXM4,2184.0,1092.0,7.72,0.778
+gdp_per_capita,SGP,Singapore,gcp,H100_SXM5,1979.0,989.5,2.78,0.667
+gdp_per_capita,SGP,Singapore,gcp,A100_SXM4,2184.0,1092.0,7.21,0.778
+gdp_per_capita,NGA,Nigeria,aws,H100_SXM5,0.0,0.0,0.07,0.0
+gdp_per_capita,NGA,Nigeria,aws,A100_SXM4,0.0,0.0,0.19,0.0
+gdp_per_capita,NGA,Nigeria,gcp,H100_SXM5,0.0,0.0,0.07,0.0
+gdp_per_capita,NGA,Nigeria,gcp,A100_SXM4,0.0,0.0,0.19,0.0
+gdp_per_capita,CHN,China,aws,H100_SXM5,0.0,0.0,0.56,0.0
+gdp_per_capita,CHN,China,aws,A100_SXM4,0.0,0.0,1.5,0.0
+gdp_per_capita,CHN,China,gcp,H100_SXM5,0.0,0.0,0.58,0.0
+gdp_per_capita,CHN,China,gcp,A100_SXM4,0.0,0.0,1.5,0.0
+rd_per_researcher,USA,United States,aws,H100_SXM5,2968.5,2968.5,3.53,1.0
+rd_per_researcher,USA,United States,aws,A100_SXM4,2808.0,2808.0,9.42,1.0
+rd_per_researcher,USA,United States,gcp,H100_SXM5,2968.5,2968.5,3.64,1.0
+rd_per_researcher,USA,United States,gcp,A100_SXM4,2808.0,2808.0,9.45,1.0
+rd_per_researcher,DEU,Germany,aws,H100_SXM5,1979.0,1979.0,2.52,0.667
+rd_per_researcher,DEU,Germany,aws,A100_SXM4,1872.0,1872.0,6.73,0.667
+rd_per_researcher,DEU,Germany,gcp,H100_SXM5,1979.0,1979.0,2.6,0.667
+rd_per_researcher,DEU,Germany,gcp,A100_SXM4,1872.0,1872.0,6.75,0.667
+rd_per_researcher,JPN,Japan,aws,H100_SXM5,989.5,989.5,1.52,0.333
+rd_per_researcher,JPN,Japan,aws,A100_SXM4,1248.0,1248.0,4.06,0.444
+rd_per_researcher,JPN,Japan,gcp,H100_SXM5,989.5,989.5,1.43,0.333
+rd_per_researcher,JPN,Japan,gcp,A100_SXM4,936.0,936.0,3.7,0.333
+rd_per_researcher,GBR,United Kingdom,aws,H100_SXM5,1979.0,1979.0,2.35,0.667
+rd_per_researcher,GBR,United Kingdom,aws,A100_SXM4,1872.0,1872.0,6.26,0.667
+rd_per_researcher,GBR,United Kingdom,gcp,H100_SXM5,1979.0,1979.0,2.42,0.667
+rd_per_researcher,GBR,United Kingdom,gcp,A100_SXM4,1872.0,1872.0,6.28,0.667
+rd_per_researcher,IND,India,aws,H100_SXM5,0.0,0.0,0.42,0.0
+rd_per_researcher,IND,India,aws,A100_SXM4,312.0,156.0,1.11,0.111
+rd_per_researcher,IND,India,gcp,H100_SXM5,0.0,0.0,0.41,0.0
+rd_per_researcher,IND,India,gcp,A100_SXM4,312.0,156.0,1.07,0.111
+rd_per_researcher,BRA,Brazil,aws,H100_SXM5,0.0,0.0,0.83,0.0
+rd_per_researcher,BRA,Brazil,aws,A100_SXM4,624.0,312.0,2.2,0.222
+rd_per_researcher,BRA,Brazil,gcp,H100_SXM5,0.0,0.0,0.85,0.0
+rd_per_researcher,BRA,Brazil,gcp,A100_SXM4,624.0,312.0,2.21,0.222
+rd_per_researcher,ARE,United Arab Emirates,aws,H100_SXM5,989.5,494.8,1.83,0.333
+rd_per_researcher,ARE,United Arab Emirates,aws,A100_SXM4,1248.0,624.0,4.87,0.444
+rd_per_researcher,ARE,United Arab Emirates,gcp,H100_SXM5,989.5,494.8,1.88,0.333
+rd_per_researcher,ARE,United Arab Emirates,gcp,A100_SXM4,1248.0,624.0,4.89,0.444
+rd_per_researcher,SGP,Singapore,aws,H100_SXM5,1979.0,989.5,2.7,0.667
+rd_per_researcher,SGP,Singapore,aws,A100_SXM4,2184.0,1092.0,7.19,0.778
+rd_per_researcher,SGP,Singapore,gcp,H100_SXM5,1979.0,989.5,2.59,0.667
+rd_per_researcher,SGP,Singapore,gcp,A100_SXM4,1872.0,936.0,6.71,0.667
+rd_per_researcher,NGA,Nigeria,aws,H100_SXM5,0.0,0.0,0.16,0.0
+rd_per_researcher,NGA,Nigeria,aws,A100_SXM4,0.0,0.0,0.42,0.0
+rd_per_researcher,NGA,Nigeria,gcp,H100_SXM5,0.0,0.0,0.16,0.0
+rd_per_researcher,NGA,Nigeria,gcp,A100_SXM4,0.0,0.0,0.42,0.0
+rd_per_researcher,CHN,China,aws,H100_SXM5,0.0,0.0,1.57,0.0
+rd_per_researcher,CHN,China,aws,A100_SXM4,0.0,0.0,4.17,0.0
+rd_per_researcher,CHN,China,gcp,H100_SXM5,0.0,0.0,1.61,0.0
+rd_per_researcher,CHN,China,gcp,A100_SXM4,0.0,0.0,4.19,0.0

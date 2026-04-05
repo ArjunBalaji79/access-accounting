@@ -1,0 +1,110 @@
+# Country configurations for Access Accounting pilot
+# Sources: World Bank ICP 2024, BIS AI Diffusion IFR (90 FR 4544)
+#
+# PPP factors: World Bank "PPP conversion factor, GDP (LCU per international $)"
+# https://data.worldbank.org/indicator/PA.NUS.PPPC.RF
+# Values here are illustrative based on ICP 2024 reporting.
+# VERIFY against the live World Bank data portal before publication.
+#
+# BIS tiers: From Supplement No. 2 to Part 740 of the EAR,
+# per 90 FR 4544 (Jan 15, 2025). Note: IFR was rescinded May 2025;
+# tiers are used as a historical design case.
+#
+# GDP per capita: World Bank WDI, current USD, most recent year
+# https://data.worldbank.org/indicator/NY.GDP.PCAP.CD
+
+# === TIER 1 COUNTRIES ===
+
+- name: United States
+  iso_alpha3: USA
+  bis_tier: 1
+  tpp_cap: null  # No cap for Tier 1
+  ppp_factor: 1.0  # Reference country
+  gdp_per_capita_usd: 80035
+  rd_spend_per_researcher_usd: 406000  # UNESCO UIS, verify
+  notes: "Reference country for PPP normalization"
+
+- name: Germany
+  iso_alpha3: DEU
+  bis_tier: 1
+  tpp_cap: null
+  ppp_factor: 0.78  # ICP 2024 illustrative
+  gdp_per_capita_usd: 52824
+  rd_spend_per_researcher_usd: 290000
+  notes: "EU member; Frankfurt AWS/GCP/Azure region"
+
+- name: Japan
+  iso_alpha3: JPN
+  bis_tier: 1
+  tpp_cap: null
+  ppp_factor: 0.69  # ICP 2024 illustrative — yen weakness amplifies
+  gdp_per_capita_usd: 33950
+  rd_spend_per_researcher_usd: 175000
+  notes: "Tokyo AWS/GCP region; interesting PPP case due to yen"
+
+- name: United Kingdom
+  iso_alpha3: GBR
+  bis_tier: 1
+  tpp_cap: null
+  ppp_factor: 0.79  # ICP 2024 illustrative
+  gdp_per_capita_usd: 48913
+  rd_spend_per_researcher_usd: 270000
+  notes: "London AWS/GCP/Azure region"
+
+# === TIER 2 COUNTRIES ===
+
+- name: India
+  iso_alpha3: IND
+  bis_tier: 2
+  tpp_cap: 790000000  # 790M TPP cumulative 2025-2027
+  ppp_factor: 0.26  # ICP 2024 illustrative
+  gdp_per_capita_usd: 2485
+  rd_spend_per_researcher_usd: 48000
+  notes: "Mumbai AWS region; large domestic AI ambitions"
+
+- name: Brazil
+  iso_alpha3: BRA
+  bis_tier: 2
+  tpp_cap: 790000000
+  ppp_factor: 0.39  # ICP 2024 illustrative
+  gdp_per_capita_usd: 8920
+  rd_spend_per_researcher_usd: 95000
+  notes: "São Paulo AWS/GCP region"
+
+- name: United Arab Emirates
+  iso_alpha3: ARE
+  bis_tier: 2
+  tpp_cap: 790000000
+  ppp_factor: 0.62  # ICP 2024 illustrative
+  gdp_per_capita_usd: 49450
+  rd_spend_per_researcher_usd: 210000
+  notes: "Bahrain AWS region; high GDP but Tier 2"
+
+- name: Singapore
+  iso_alpha3: SGP
+  bis_tier: 2
+  tpp_cap: 790000000
+  ppp_factor: 0.58  # ICP 2024 illustrative
+  gdp_per_capita_usd: 65640
+  rd_spend_per_researcher_usd: 310000
+  notes: "Singapore AWS/GCP region; wealthy Tier 2 — tests legal vs economic"
+
+- name: Nigeria
+  iso_alpha3: NGA
+  bis_tier: 2
+  tpp_cap: 790000000
+  ppp_factor: 0.20  # ICP 2024 illustrative
+  gdp_per_capita_usd: 1620
+  rd_spend_per_researcher_usd: 18000
+  notes: "No local cloud region; must use EU-West (Ireland)"
+
+# === TIER 3 COUNTRIES ===
+
+- name: China
+  iso_alpha3: CHN
+  bis_tier: 3
+  tpp_cap: 0  # Prohibited
+  ppp_factor: 0.42  # ICP 2024 illustrative
+  gdp_per_capita_usd: 12720
+  rd_spend_per_researcher_usd: 180000
+  notes: "Entity List restrictions; domestic alternatives (Huawei Ascend) exist but outside scope"
