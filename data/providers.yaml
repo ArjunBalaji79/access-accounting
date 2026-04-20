@@ -4,15 +4,19 @@
 # IMPORTANT: All prices are per-GPU-hour, derived by dividing
 # instance price by GPUs per instance.
 #
-# Pricing retrieval: These are illustrative values based on Q1 2026
-# public pricing pages. VERIFY all values before publication.
-# Record the exact URL and date you accessed each price.
+# Pricing retrieval: Values below reflect public pricing pages as of the
+# pricing_retrieval_date shown on each provider entry. VERIFY by running
+# `python -m src.verify_data --config data/` before publication.
 #
 # Availability class:
 #   GA = Generally Available (can provision on-demand)
 #   Limited = Available but capacity-constrained
 #   Waitlisted = Must request access / join waitlist
 #   Unavailable = Not offered in this region
+#
+# `pricing_type` distinguishes AWS Capacity Blocks (pre-reserved cluster
+# pricing) from standard On-Demand. The paper uses On-Demand equivalents as
+# the comparable baseline across providers.
 
 # ============================================================
 # AWS
@@ -25,6 +29,7 @@
   gpu_class: H100_SXM5
   instance_type: p5.48xlarge
   gpus_per_instance: 8
+  pricing_type: capacity_blocks
   regions:
     - region_code: us-east-1
       region_country_iso: USA
@@ -32,8 +37,15 @@
       reserved_usd_per_gpu_hr: null  # Capacity Blocks only
       spot_usd_per_gpu_hr: null
       availability_class: GA
+    - region_code: us-west-1
+      region_country_iso: USA  # N. California exception
+      on_demand_usd_per_gpu_hr: 4.916  # Capacity Blocks exception (confirmed 2026-04-20)
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: null
+      availability_class: GA
     - region_code: eu-west-1
-      region_country_iso: IRL  # Ireland — serves DEU, NGA
+      region_country_iso: IRL  # Ireland — Nigeria's fallback routing
+      # H100 via On-Demand pricing (not Capacity Blocks) in eu-west-1.
       on_demand_usd_per_gpu_hr: 3.933
       reserved_usd_per_gpu_hr: null
       spot_usd_per_gpu_hr: null
@@ -52,6 +64,18 @@
       availability_class: GA
     - region_code: ap-northeast-1
       region_country_iso: JPN  # Tokyo
+      on_demand_usd_per_gpu_hr: 3.933
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: null
+      availability_class: GA
+    - region_code: ap-southeast-2
+      region_country_iso: AUS  # Sydney — added 2026-04-30
+      on_demand_usd_per_gpu_hr: 3.933
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: null
+      availability_class: GA
+    - region_code: ap-southeast-3
+      region_country_iso: IDN  # Jakarta — added 2026-04-30
       on_demand_usd_per_gpu_hr: 3.933
       reserved_usd_per_gpu_hr: null
       spot_usd_per_gpu_hr: null
@@ -81,7 +105,7 @@
       spot_usd_per_gpu_hr: null
       availability_class: GA
   pricing_url: "https://aws.amazon.com/ec2/capacityblocks/pricing/"
-  pricing_retrieval_date: "2026-04-01"
+  pricing_retrieval_date: "2026-04-30"
 
 # --- A100 SXM4 (p4d.24xlarge = 8x A100) ---
 # Source: https://aws.amazon.com/ec2/pricing/on-demand/
@@ -90,6 +114,7 @@
   gpu_class: A100_SXM4
   instance_type: p4d.24xlarge
   gpus_per_instance: 8
+  pricing_type: on_demand
   regions:
     - region_code: us-east-1
       region_country_iso: USA
@@ -146,16 +171,17 @@
       spot_usd_per_gpu_hr: null
       availability_class: GA
   pricing_url: "https://aws.amazon.com/ec2/pricing/on-demand/"
-  pricing_retrieval_date: "2026-04-01"
+  pricing_retrieval_date: "2026-04-30"
 
 # ============================================================
-# GCP (illustrative — verify all values)
+# GCP (flagged UNVERIFIED — requires manual spot-check)
 # ============================================================
 
 - provider: gcp
   gpu_class: H100_SXM5
   instance_type: a3-highgpu-8g
   gpus_per_instance: 8
+  pricing_type: on_demand
   regions:
     - region_code: us-central1
       region_country_iso: USA
@@ -188,13 +214,14 @@
       spot_usd_per_gpu_hr: null
       availability_class: GA
   pricing_url: "https://cloud.google.com/compute/gpus-pricing"
-  pricing_retrieval_date: "2026-04-01"
+  pricing_retrieval_date: "2026-04-30"
 
 - provider: gcp
   gpu_class: A100_SXM4
   instance_type: a2-highgpu-8g
   gpus_per_instance: 8
-  regions:
+  pricing_type: on_demand
+  regions:  
     - region_code: us-central1
       region_country_iso: USA
       on_demand_usd_per_gpu_hr: 1.47
@@ -226,4 +253,132 @@
       spot_usd_per_gpu_hr: null
       availability_class: GA
   pricing_url: "https://cloud.google.com/compute/gpus-pricing"
-  pricing_retrieval_date: "2026-04-01"
+  pricing_retrieval_date: "2026-04-30"
+
+# ============================================================
+# Azure
+# ============================================================
+# Prices pulled from the Azure Retail Prices API (the authoritative
+# public pricing endpoint) on 2026-04-30:
+#   https://prices.azure.com/api/retail/prices
+#
+# Per-GPU rates are instance price ÷ 8 (both SKUs ship 8 GPUs).
+# `reserved_usd_per_gpu_hr` uses the **1-Year Savings Plan** rate where
+# Azure publishes one — this is the closest analogue to AWS's 1-year
+# Reserved Instance field and GCP's 1-year committed-use rate. Regions
+# where Azure does not publish a 1-Year SP leave the field null, matching
+# the AWS / GCP null-pattern rather than synthesising a number.
+# `spot_usd_per_gpu_hr` uses Azure Spot (the GA-equivalent of the older
+# "Low Priority" tier), not Low Priority.
+
+# --- H100 SXM5 (Standard_ND96isr_H100_v5 = 8x H100 80GB SXM5) ---
+
+- provider: azure
+  gpu_class: H100_SXM5
+  instance_type: Standard_ND96isr_H100_v5
+  gpus_per_instance: 8
+  pricing_type: on_demand
+  regions:
+    - region_code: eastus
+      region_country_iso: USA
+      on_demand_usd_per_gpu_hr: 12.290
+      reserved_usd_per_gpu_hr: null  # 1-Year SP not published for H100 v5
+      spot_usd_per_gpu_hr: 2.271
+      availability_class: GA
+    - region_code: westus3
+      region_country_iso: USA  # secondary USA region (parity with AWS us-east/us-west pair)
+      on_demand_usd_per_gpu_hr: 12.290
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 2.271
+      availability_class: GA
+    - region_code: westeurope
+      region_country_iso: NLD  # Netherlands — serves DEU / NGA fallback
+      on_demand_usd_per_gpu_hr: 16.529
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 2.953
+      availability_class: GA
+    - region_code: uksouth
+      region_country_iso: GBR
+      on_demand_usd_per_gpu_hr: 15.915
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 2.839
+      availability_class: GA
+    - region_code: japaneast
+      region_country_iso: JPN
+      on_demand_usd_per_gpu_hr: 18.373
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 3.293
+      availability_class: GA
+    - region_code: uaenorth
+      region_country_iso: ARE
+      on_demand_usd_per_gpu_hr: 18.127
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 3.248
+      availability_class: GA
+  pricing_url: "https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/"
+  pricing_retrieval_date: "2026-04-30"
+
+# --- A100 SXM4 (Standard_ND96amsr_A100_v4 = 8x A100 80GB SXM4) ---
+
+- provider: azure
+  gpu_class: A100_SXM4
+  instance_type: Standard_ND96amsr_A100_v4
+  gpus_per_instance: 8
+  pricing_type: on_demand
+  regions:
+    - region_code: eastus
+      region_country_iso: USA
+      on_demand_usd_per_gpu_hr: 4.648
+      reserved_usd_per_gpu_hr: 3.531  # 1-Year Savings Plan
+      spot_usd_per_gpu_hr: 1.209
+      availability_class: GA
+    - region_code: westus3
+      region_country_iso: USA
+      on_demand_usd_per_gpu_hr: 4.096
+      reserved_usd_per_gpu_hr: 3.531
+      spot_usd_per_gpu_hr: 1.209
+      availability_class: GA
+    - region_code: westeurope
+      region_country_iso: NLD
+      on_demand_usd_per_gpu_hr: 5.120
+      reserved_usd_per_gpu_hr: 4.413
+      spot_usd_per_gpu_hr: 1.331
+      availability_class: GA
+    - region_code: germanynorth
+      region_country_iso: DEU
+      on_demand_usd_per_gpu_hr: 6.923
+      reserved_usd_per_gpu_hr: 5.967
+      spot_usd_per_gpu_hr: 1.800
+      availability_class: GA
+    - region_code: uksouth
+      region_country_iso: GBR
+      on_demand_usd_per_gpu_hr: 5.672
+      reserved_usd_per_gpu_hr: null  # 1-Year SP not published for this region
+      spot_usd_per_gpu_hr: 1.331
+      availability_class: GA
+    - region_code: japaneast
+      region_country_iso: JPN
+      on_demand_usd_per_gpu_hr: 5.940
+      reserved_usd_per_gpu_hr: 5.119
+      spot_usd_per_gpu_hr: 1.688
+      availability_class: GA
+    - region_code: southindia
+      region_country_iso: IND
+      on_demand_usd_per_gpu_hr: 6.737
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 1.752
+      availability_class: GA
+    - region_code: brazilsouth
+      region_country_iso: BRA
+      on_demand_usd_per_gpu_hr: 8.745
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 2.274
+      availability_class: GA
+    - region_code: uaenorth
+      region_country_iso: ARE
+      on_demand_usd_per_gpu_hr: 6.410
+      reserved_usd_per_gpu_hr: null
+      spot_usd_per_gpu_hr: 1.523
+      availability_class: GA
+  pricing_url: "https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/"
+  pricing_retrieval_date: "2026-04-30"

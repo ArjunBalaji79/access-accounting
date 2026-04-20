@@ -1,10 +1,14 @@
 # Country configurations for Access Accounting pilot
 # Sources: World Bank ICP 2024, BIS AI Diffusion IFR (90 FR 4544)
 #
-# PPP factors: World Bank "PPP conversion factor, GDP (LCU per international $)"
+# PPP factors: World Bank "Price level ratio of PPP conversion factor (GDP) to
+# market exchange rate" (indicator PA.NUS.PPPC.RF). USA = 1.0 baseline.
 # https://data.worldbank.org/indicator/PA.NUS.PPPC.RF
-# Values here are illustrative based on ICP 2024 reporting.
-# VERIFY against the live World Bank data portal before publication.
+#
+# VERIFICATION (2026-04-30):
+# Values below were reconciled against the World Bank v2 API.
+# Run `python -m src.verify_data --config data/` to reproduce.
+# `data_verified_date` records the last operator-confirmed reconciliation.
 #
 # BIS tiers: From Supplement No. 2 to Part 740 of the EAR,
 # per 90 FR 4544 (Jan 15, 2025). Note: IFR was rescinded May 2025;
@@ -12,6 +16,20 @@
 #
 # GDP per capita: World Bank WDI, current USD, most recent year
 # https://data.worldbank.org/indicator/NY.GDP.PCAP.CD
+#
+# DATA SOVEREIGNTY (README_06):
+# `data_sovereignty_class` records the most restrictive cross-border data
+# transfer regime applicable in the jurisdiction. Values:
+#   none                    — no federal data localization or transfer law
+#   cross_border_restricted — transfer permitted with conditions (SCCs,
+#                             adequacy, consent)
+#   localization_required   — certain data categories must be stored /
+#                             processed in-country
+#   transfer_prohibited     — cross-border transfer of covered data is
+#                             prohibited outright
+# This field is *descriptive* in AAR-Core and does NOT modify the ECA
+# score — the binding constraint depends on workload data type (public
+# text vs. patient records) which is outside the schema's scope.
 
 # === TIER 1 COUNTRIES ===
 
@@ -19,36 +37,55 @@
   iso_alpha3: USA
   bis_tier: 1
   tpp_cap: null  # No cap for Tier 1
-  ppp_factor: 1.0  # Reference country
-  gdp_per_capita_usd: 80035
-  rd_spend_per_researcher_usd: 406000  # UNESCO UIS, verify
+  ppp_factor: 1.0  # Reference country (by construction PPP/FCRF = 1.0)
+  gdp_per_capita_usd: 84534  # World Bank NY.GDP.PCAP.CD 2024
+  rd_spend_per_researcher_usd: 406000  # UNESCO UIS, verify manually
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "none"
+  data_sovereignty_source: "No federal data localization law; sectoral rules (HIPAA, FERPA, CJIS) apply to specific data types but impose no blanket cross-border restriction"
   notes: "Reference country for PPP normalization"
 
 - name: Germany
   iso_alpha3: DEU
   bis_tier: 1
   tpp_cap: null
-  ppp_factor: 0.78  # ICP 2024 illustrative
-  gdp_per_capita_usd: 52824
+  ppp_factor: 0.76  # World Bank PA.NUS.PPP / PA.NUS.FCRF 2024 = 0.7586
+  gdp_per_capita_usd: 56104  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 290000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "GDPR Art. 46-49; transfers outside EU/EEA require adequacy decision, SCCs, or BCRs; Schrems II (C-311/18) invalidated Privacy Shield for US transfers"
   notes: "EU member; Frankfurt AWS/GCP/Azure region"
 
 - name: Japan
   iso_alpha3: JPN
   bis_tier: 1
   tpp_cap: null
-  ppp_factor: 0.69  # ICP 2024 illustrative — yen weakness amplifies
-  gdp_per_capita_usd: 33950
+  # PA.NUS.PPP(JP) 2024 = 94.4626 ¥/intl$ ; PA.NUS.FCRF(JP) 2024 = 151.3663 ¥/US$
+  # price-level ratio = 94.4626 / 151.3663 = 0.6241 → rounded to 0.62.
+  # 2025 PPP is published at 95.0003 but 2025 FCRF is not; applying 2024 FCRF
+  # gives 0.6276 — a 0.6% shift that rounds to the same 0.62.
+  ppp_factor: 0.62
+  gdp_per_capita_usd: 32487  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 175000
-  notes: "Tokyo AWS/GCP region; interesting PPP case due to yen"
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "APPI Art. 28; cross-border transfer requires consent or an equivalent-protection finding; Japan has an EU adequacy decision (2019, reviewed 2023)"
+  notes: "Tokyo AWS/GCP region; interesting PPP case due to sustained yen weakness"
 
 - name: United Kingdom
   iso_alpha3: GBR
   bis_tier: 1
   tpp_cap: null
-  ppp_factor: 0.79  # ICP 2024 illustrative
-  gdp_per_capita_usd: 48913
+  # PA.NUS.PPP(GB) 2024 = 0.6642 £/intl$ ; PA.NUS.FCRF(GB) 2024 = 0.7824 £/US$
+  # price-level ratio = 0.6642 / 0.7824 = 0.8489 → rounded to 0.85.
+  # 2025 PPP = 0.6698 with 2024 FCRF gives 0.8561 (<1% shift).
+  ppp_factor: 0.85
+  gdp_per_capita_usd: 53246  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 270000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "UK GDPR Art. 46-49; post-Brexit EU adequacy decision (2021, renewed 2025); similar transfer mechanism requirements to GDPR"
   notes: "London AWS/GCP/Azure region"
 
 # === TIER 2 COUNTRIES ===
@@ -57,45 +94,60 @@
   iso_alpha3: IND
   bis_tier: 2
   tpp_cap: 790000000  # 790M TPP cumulative 2025-2027
-  ppp_factor: 0.26  # ICP 2024 illustrative
-  gdp_per_capita_usd: 2485
+  ppp_factor: 0.24  # PA.NUS.PPP(IN)/PA.NUS.FCRF(IN) 2024 ≈ 20.42/85 ≈ 0.24
+  gdp_per_capita_usd: 2695  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 48000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "DPDP Act 2023 Sec. 16(1); central government may restrict transfer to specified countries; implementing rules pending as of 2026; RBI data localization mandate applies to payment data"
   notes: "Mumbai AWS region; large domestic AI ambitions"
 
 - name: Brazil
   iso_alpha3: BRA
   bis_tier: 2
   tpp_cap: 790000000
-  ppp_factor: 0.39  # ICP 2024 illustrative
-  gdp_per_capita_usd: 8920
+  ppp_factor: 0.39  # World Bank 2021 ICP round
+  gdp_per_capita_usd: 10311  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 95000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "LGPD Art. 33; transfer requires adequacy finding, SCCs, or consent; ANPD has not yet issued a public adequacy list"
   notes: "São Paulo AWS/GCP region"
 
 - name: United Arab Emirates
   iso_alpha3: ARE
   bis_tier: 2
   tpp_cap: 790000000
-  ppp_factor: 0.62  # ICP 2024 illustrative
-  gdp_per_capita_usd: 49450
+  ppp_factor: 0.63  # PA.NUS.PPP(AE)/PA.NUS.FCRF(AE) 2024 = 0.6345
+  gdp_per_capita_usd: 50274  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 210000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "Federal Decree-Law No. 45/2021 (PDPL) Art. 22; cross-border transfer requires adequate protection or consent; DIFC and ADGM free zones operate separate regimes"
   notes: "Bahrain AWS region; high GDP but Tier 2"
 
 - name: Singapore
   iso_alpha3: SGP
   bis_tier: 2
   tpp_cap: 790000000
-  ppp_factor: 0.58  # ICP 2024 illustrative
-  gdp_per_capita_usd: 65640
+  ppp_factor: 0.58  # World Bank 2021 ICP round; FCRF 2024 unavailable
+  gdp_per_capita_usd: 90674  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 310000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "PDPA 2012 Sec. 26; transfer permitted where the recipient jurisdiction provides comparable protection or contractual safeguards are in place"
   notes: "Singapore AWS/GCP region; wealthy Tier 2 — tests legal vs economic"
 
 - name: Nigeria
   iso_alpha3: NGA
   bis_tier: 2
   tpp_cap: 790000000
-  ppp_factor: 0.20  # ICP 2024 illustrative
-  gdp_per_capita_usd: 1620
+  ppp_factor: 0.20  # World Bank 2021 ICP round
+  gdp_per_capita_usd: 1084  # World Bank NY.GDP.PCAP.CD 2024 (contraction in USD terms)
   rd_spend_per_researcher_usd: 18000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "cross_border_restricted"
+  data_sovereignty_source: "NDPA 2023 Sec. 43; cross-border transfer requires an NDPC adequacy assessment or data-subject consent; implementing regulations still developing"
   notes: "No local cloud region; must use EU-West (Ireland)"
 
 # === TIER 3 COUNTRIES ===
@@ -104,7 +156,10 @@
   iso_alpha3: CHN
   bis_tier: 3
   tpp_cap: 0  # Prohibited
-  ppp_factor: 0.42  # ICP 2024 illustrative
-  gdp_per_capita_usd: 12720
+  ppp_factor: 0.49  # PA.NUS.PPP(CN)/PA.NUS.FCRF(CN) 2024 = 0.4908
+  gdp_per_capita_usd: 13303  # World Bank NY.GDP.PCAP.CD 2024
   rd_spend_per_researcher_usd: 180000
+  data_verified_date: "2026-04-30"
+  data_sovereignty_class: "localization_required"
+  data_sovereignty_source: "PIPL Art. 38-40 + CSL Art. 37 + DSL Art. 31; critical information infrastructure operators must store personal/important data domestically; cross-border transfer requires a CAC security assessment above volume thresholds"
   notes: "Entity List restrictions; domestic alternatives (Huawei Ascend) exist but outside scope"

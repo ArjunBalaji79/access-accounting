@@ -7,7 +7,11 @@ and that the formulas match the paper's definitions.
 
 import math
 import pytest
-from src.eca import compute_eca, compute_normalization_value
+from src.eca import (
+    compute_eca,
+    compute_eca_budget_sweep,
+    compute_normalization_value,
+)
 
 
 def make_record(
@@ -137,6 +141,91 @@ class TestECAMath:
         r = results[0]
         # ECA = chips × TFLOP/s → units are TFLOP/s (throughput of the affordable cluster)
         assert r.eca_scenario_a == r.affordable_chips * 989.5
+
+
+class TestContinuousECA:
+    """Continuous ECA (no floor) should reveal gradient hidden by floor()."""
+
+    def test_continuous_eca_shows_gradient(self):
+        """Continuous ECA should differentiate countries that discrete ECA lumps together."""
+        usa = make_record()
+        germany = make_record(
+            country_iso="DEU", country_name="Germany",
+            ppp_factor=0.78, gdp_per_capita=52824, bis_tier=1,
+        )
+        japan = make_record(
+            country_iso="JPN", country_name="Japan",
+            ppp_factor=0.69, gdp_per_capita=33950, bis_tier=1,
+        )
+        results = compute_eca([usa, germany, japan], budget_usd=10_000, reference_hours=720)
+        deu = next(r for r in results if r.country_iso == "DEU")
+        jpn = next(r for r in results if r.country_iso == "JPN")
+        # Discrete: both get floor(~2.x) = 2 chips → same ECA.
+        assert deu.affordable_chips == jpn.affordable_chips
+        # Continuous: Germany > Japan because PPP 0.78 > 0.69.
+        assert deu.eca_continuous_scenario_a > jpn.eca_continuous_scenario_a
+
+    def test_zero_discrete_nonzero_continuous(self):
+        """Countries that can't afford 1 full run should still show nonzero continuous ECA."""
+        usa = make_record()
+        india = make_record(
+            country_iso="IND", country_name="India",
+            ppp_factor=0.24, gdp_per_capita=2695, bis_tier=2,
+        )
+        results = compute_eca([usa, india], budget_usd=10_000, reference_hours=720)
+        ind = next(r for r in results if r.country_iso == "IND")
+        assert ind.affordable_chips == 0
+        assert ind.eca_continuous_scenario_a > 0
+
+    def test_continuous_zero_when_alpha_zero(self):
+        """Continuous ECA should respect availability multiplier (zero → zero)."""
+        usa = make_record()
+        china = make_record(
+            country_iso="CHN", country_name="China",
+            ppp_factor=0.49, gdp_per_capita=13303, bis_tier=3,
+            avail_class="Unavailable", avail_score=0.0,
+        )
+        results = compute_eca([usa, china], budget_usd=10_000, reference_hours=720)
+        chn = next(r for r in results if r.country_iso == "CHN")
+        assert chn.eca_continuous_scenario_a == 0.0
+
+    def test_nominal_tflops_ignores_ppp_and_alpha(self):
+        """eca_nominal_tflops should be the same across countries sharing price/peak."""
+        usa = make_record()
+        india = make_record(
+            country_iso="IND", country_name="India",
+            ppp_factor=0.24, bis_tier=2, avail_class="Limited", avail_score=0.5,
+        )
+        results = compute_eca([usa, india], budget_usd=10_000, reference_hours=720)
+        usa_r = next(r for r in results if r.country_iso == "USA")
+        ind_r = next(r for r in results if r.country_iso == "IND")
+        assert usa_r.eca_nominal_tflops == ind_r.eca_nominal_tflops
+
+
+class TestBudgetSweep:
+    """Multi-budget sweep should produce len(countries) × len(budgets) records."""
+
+    def test_budget_sweep_produces_multiple_results(self):
+        records = [make_record()]
+        results = compute_eca_budget_sweep(records, budgets=[10_000, 25_000])
+        assert len(results) == 2
+
+    def test_budget_sweep_eca_monotonic(self):
+        """Higher budget → more (or equal) discrete ECA for the same country."""
+        records = [make_record()]
+        results = compute_eca_budget_sweep(
+            records,
+            budgets=[5_000, 10_000, 25_000, 50_000, 100_000],
+        )
+        ecas = [r.eca_scenario_a for r in results]
+        assert ecas == sorted(ecas)
+
+    def test_budget_sweep_continuous_strictly_monotonic(self):
+        """Continuous ECA should be strictly monotonic in budget (no floor plateaus)."""
+        records = [make_record()]
+        results = compute_eca_budget_sweep(records, budgets=[5_000, 10_000, 25_000])
+        conts = [r.eca_continuous_scenario_a for r in results]
+        assert conts[0] < conts[1] < conts[2]
 
 
 class TestNormalization:
