@@ -386,10 +386,16 @@ def fig3_rank_stability(
         if not all_names:
             all_names = [r["country_name"] for r in rows]
 
-    # Drop trivial ends (USA always #1, CHN always last at 0) unless the
-    # caller has explicitly asked for a different country set.
+    # Drop only the degenerate case (China is Tier 3, always ECA = 0
+    # everywhere, so it contributes no rank information). USA is kept
+    # because under GDP/capita normalization Singapore overtakes it —
+    # i.e. USA is NOT trivially rank #1 across all methods. We reverse
+    # so worst-off countries appear at the TOP of the chart — that matches
+    # imshow's default orientation (row 0 at top) and avoids the need for
+    # invert_yaxis(), which previously caused tick labels and bar data to
+    # come unstuck when the two panels share a y-axis.
     if countries is None:
-        countries = [c for c in all_names if c not in ("United States", "China")]
+        countries = [c for c in reversed(all_names) if c != "China"]
 
     if not countries:
         print("[fig3] no middle countries to plot")
@@ -406,41 +412,88 @@ def fig3_rank_stability(
     )
 
     fig, (ax_rank, ax_val) = plt.subplots(
-        1, 2, figsize=(12, max(4.5, 0.5 * len(countries) + 2)),
-        gridspec_kw={"width_ratios": [1.0, 1.1], "wspace": 0.08},
-        sharey=True,
+        1, 2, figsize=(13, max(5.0, 0.55 * len(countries) + 2)),
+        gridspec_kw={"width_ratios": [1.1, 1.0], "wspace": 0.35},
     )
 
-    # Discrete stability coloring: 0 = stable, 1 = ±1 shift, 2 = ±2+ shift.
-    shift = np.abs(matrix - base[:, None])
-    stability = np.where(shift == 0, 0, np.where(shift == 1, 1, 2))
-    stability_colors = ["#4DAC26", "#F7D549", "#D55E00"]  # green / yellow / orange-red
-    cmap = matplotlib.colors.ListedColormap(stability_colors)
-    ax_rank.imshow(stability, cmap=cmap, vmin=0, vmax=2, aspect="auto")
+    # Slope / bump chart.  Each country is ONE line drawn across three
+    # x positions (PPP, GDP/cap, R&D) at y = its rank under that method.
+    # Rank #1 sits at the top (inverted y-axis), so a line that climbs
+    # visually means the country *gained* rank; a line that slopes down
+    # means the country *lost* rank.  No color legend, no arrows — the
+    # slope of each line is the shift, which is the entire point.
+    x_positions = np.arange(len(methods))
 
-    for i, c in enumerate(countries):
-        for j, m in enumerate(methods):
-            ax_rank.text(
-                j, i, f"#{matrix[i, j]}",
-                ha="center", va="center",
-                fontsize=10, fontweight="bold",
-                color="black" if stability[i, j] < 2 else "white",
-            )
+    # Anything moving 2+ positions is a "significant shift" worth
+    # highlighting.  Everyone else is drawn in neutral gray so the eye
+    # gets drawn to the handful of lines that actually cross.
+    SHIFT_THRESHOLD = 2
+    NEUTRAL = "#B8B8B8"
+    movers = {}  # country -> line color
+    for c in countries:
+        ranks = [rankings[m][c] for m in methods]
+        max_abs_shift = max(abs(ranks[0] - r) for r in ranks[1:])
+        if max_abs_shift >= SHIFT_THRESHOLD:
+            # Color by direction of the dominant shift so "gainers" and
+            # "losers" are separable at a glance. This is NOT a traffic-
+            # light (green/red); it is a simple distinguishable pair.
+            direction = (ranks[0] - ranks[-1])  # positive → gained
+            movers[c] = "#1F6FB0" if direction > 0 else "#C0504D"
 
-    ax_rank.set_xticks(range(len(methods)))
-    ax_rank.set_xticklabels(method_labels)
-    ax_rank.set_yticks(range(len(countries)))
-    ax_rank.set_yticklabels(countries)
-    ax_rank.set_title("Rank under each normalization", fontsize=11, loc="left")
-    for s in ("top", "right", "bottom", "left"):
+    for c in countries:
+        ranks = [rankings[m][c] for m in methods]
+        color = movers.get(c, NEUTRAL)
+        lw = 2.2 if c in movers else 1.1
+        alpha = 1.0 if c in movers else 0.55
+        z = 3 if c in movers else 2
+        ax_rank.plot(
+            x_positions, ranks,
+            color=color, linewidth=lw, alpha=alpha,
+            marker="o", markersize=7, markerfacecolor="white",
+            markeredgewidth=1.6, zorder=z,
+        )
+
+    # Country labels on left and right sides, right next to each line's
+    # endpoint so the reader can identify them without a legend.
+    n = len(countries)
+    for c in countries:
+        left_rank = rankings["ppp"][c]
+        right_rank = rankings[methods[-1]][c]
+        color = movers.get(c, "#555")
+        weight = "bold" if c in movers else "normal"
+        ax_rank.text(
+            -0.12, left_rank, c,
+            va="center", ha="right",
+            fontsize=9.5, color=color, fontweight=weight,
+        )
+        ax_rank.text(
+            len(methods) - 1 + 0.12, right_rank, c,
+            va="center", ha="left",
+            fontsize=9.5, color=color, fontweight=weight,
+        )
+
+    ax_rank.set_xticks(x_positions)
+    ax_rank.set_xticklabels(method_labels, fontsize=10, fontweight="bold")
+    ax_rank.set_yticks(range(1, n + 1))
+    ax_rank.set_yticklabels([f"#{i}" for i in range(1, n + 1)])
+    ax_rank.set_ylim(n + 0.5, 0.5)  # rank #1 at top
+    ax_rank.set_xlim(-0.9, len(methods) - 1 + 0.9)
+    ax_rank.set_ylabel("Rank  (#1 = best access, #9 = worst)", fontsize=10)
+    ax_rank.set_title(
+        "How each country's access rank changes when you swap economic yardsticks",
+        fontsize=11, loc="left",
+    )
+    ax_rank.grid(axis="y", alpha=0.2, linestyle=":")
+    for s in ("top", "right"):
         ax_rank.spines[s].set_visible(False)
     ax_rank.tick_params(length=0)
 
-    # Companion value panel: horizontal bars per method, tier-colored by PPP
-    # ranking position so the eye can cross-reference with the rank panel.
+    # Companion value panel: horizontal bars per method. Bars for
+    # countries[i] must live at y=i so they line up with the tick labels
+    # drawn by the rank panel (which share this y-axis via sharey=True).
     method_colors = ["#2166AC", "#5AAE61", "#9970AB"]
     bar_h = 0.26
-    y_positions = np.arange(len(countries))[::-1]
+    y_positions = np.arange(len(countries))
     for j, m in enumerate(methods):
         offset = (j - 1) * bar_h
         ax_val.barh(
@@ -448,10 +501,27 @@ def fig3_rank_stability(
             color=method_colors[j], alpha=0.85, label=method_labels[j],
             edgecolor="white", linewidth=0.5,
         )
+        # Annotate zero-valued cells with an explicit "0" marker so readers
+        # don't mistake an unaffordable country for a data gap. The floor-
+        # division ECA formula sends countries to 0 when their adjusted
+        # budget can't buy a single full run.
+        for i in range(len(countries)):
+            if eca_matrix[i, j] == 0.0:
+                ax_val.text(
+                    0, y_positions[i] + offset,
+                    "  0 (unaffordable)",
+                    va="center", ha="left",
+                    fontsize=7.5, color=method_colors[j], fontstyle="italic",
+                )
 
-    ax_val.invert_yaxis()
+    ax_val.set_yticks(y_positions)
+    ax_val.set_yticklabels(countries)
+    # countries is ordered worst → best (Nigeria, ..., USA).  With
+    # y_positions = np.arange(N) and a non-inverted axis, y=0 lands at the
+    # bottom and y=N-1 at the top, which puts USA at the top — matching
+    # the slope chart on the left (rank #1 at top).
     ax_val.set_xlabel("ECA Scenario A (TFLOP/s)", fontsize=11)
-    ax_val.set_title("ECA under each normalization", fontsize=11, loc="left")
+    ax_val.set_title("ECA value under each normalization", fontsize=11, loc="left")
     ax_val.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
     ax_val.legend(loc="lower right", frameon=False, ncol=1)
     _clean_axes(ax_val)
@@ -475,8 +545,10 @@ def fig3_rank_stability(
     )
     fig.text(
         0.02, 0.965,
-        f"Green = same rank as PPP baseline.  Yellow = ±1 shift.  "
-        f"Orange = ±2 or more.  {tau_str}",
+        "Each line is one country. Follow it left-to-right to see how its "
+        "access rank changes when we measure affordability with PPP vs. GDP/capita "
+        "vs. R&D-per-researcher. Flat line = rank unchanged; steep line = rank shift. "
+        f"Most countries stay flat ({tau_str}).",
         fontsize=8.5, color="#444",
     )
     _add_source_line(fig, y=-0.04)

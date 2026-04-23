@@ -2,7 +2,7 @@
 # Sources: World Bank ICP 2024, BIS AI Diffusion IFR (90 FR 4544)
 #
 # PPP factors: World Bank "Price level ratio of PPP conversion factor (GDP) to
-# market exchange rate" (indicator PA.NUS.PPPC.RF). USA = 1.0 baseline.
+# market exchange rate" (indicator PA.NUS.PPPC.RF).  = 1.0 baseline.
 # https://data.worldbank.org/indicator/PA.NUS.PPPC.RF
 #
 # VERIFICATION (2026-04-30):
