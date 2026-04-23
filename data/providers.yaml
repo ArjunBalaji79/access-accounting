@@ -108,13 +108,18 @@
   pricing_retrieval_date: "2026-04-30"
 
 # --- A100 SXM4 (p4d.24xlarge = 8x A100) ---
-# Source: https://aws.amazon.com/ec2/pricing/on-demand/
+# Source: https://aws.amazon.com/ec2/capacityblocks/pricing/
+# Per-GPU rate $1.475 is the AWS Capacity Blocks rate for p4d.24xlarge
+# ($11.80/hr / 8 GPUs). Standard On-Demand p4d is ~$4.10/GPU-hr; the
+# Capacity Blocks rate is used here for parity with the H100 entry above
+# (both are Capacity Blocks), since Capacity Blocks is the comparable
+# short-duration ML-training rate for this hardware class.
 
 - provider: aws
   gpu_class: A100_SXM4
   instance_type: p4d.24xlarge
   gpus_per_instance: 8
-  pricing_type: on_demand
+  pricing_type: capacity_blocks
   regions:
     - region_code: us-east-1
       region_country_iso: USA
@@ -170,7 +175,7 @@
       reserved_usd_per_gpu_hr: null
       spot_usd_per_gpu_hr: null
       availability_class: GA
-  pricing_url: "https://aws.amazon.com/ec2/pricing/on-demand/"
+  pricing_url: "https://aws.amazon.com/ec2/capacityblocks/pricing/"
   pricing_retrieval_date: "2026-04-30"
 
 # ============================================================
