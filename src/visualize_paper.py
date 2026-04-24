@@ -146,15 +146,19 @@ def fig1_compounding_gap(
 
         if tier == 1:
             entries.append(dict(label=r["country_name"] + dagger,
-                                value=econ, tier=tier, layer="After PPP"))
+                                value=econ, tier=tier, layer="After PPP",
+                                country_iso=iso))
         elif tier == 2:
             entries.append(dict(label=r["country_name"] + dagger,
-                                value=econ, tier=tier, layer="After PPP"))
+                                value=econ, tier=tier, layer="After PPP",
+                                country_iso=iso))
             entries.append(dict(label="  + Legal (Scen. B mid)",
-                                value=leg, tier=tier, layer="+ Legal"))
+                                value=leg, tier=tier, layer="+ Legal",
+                                country_iso=iso))
         else:  # Tier 3 — blocked
             entries.append(dict(label=r["country_name"] + " (Tier 3 — blocked)",
-                                value=0.0, tier=tier, layer="Blocked"))
+                                value=0.0, tier=tier, layer="Blocked",
+                                country_iso=iso))
 
     n = len(entries)
     fig, ax = plt.subplots(figsize=(10, 0.55 * n + 1.2))
@@ -185,12 +189,21 @@ def fig1_compounding_gap(
     # 3) Right-aligned annotations: "% of US" + absolute TFLOP/s.
     for i, e in enumerate(entries):
         pct = (e["value"] / baseline * 100.0) if baseline else 0.0
-        label = (
-            "0% — Tier 3 blocked" if e["tier"] == 3
-            else f"{pct:.0f}% of US  ({e['value']:,.0f} TFLOP/s)"
-        )
+        if e["tier"] == 3:
+            label = "0% — Tier 3 blocked"
+        else:
+            # One decimal for Nigeria + Legal so 156/2808 ≈ 5.6% matches the
+            # main text (~18:1) instead of 6% (which inverts to ~16.7:1).
+            nigeria_legal = (
+                e.get("country_iso") == "NGA" and e.get("layer") == "+ Legal"
+            )
+            pct_fmt = f"{pct:.1f}" if nigeria_legal else f"{pct:.0f}"
+            label = f"{pct_fmt}% of US  ({e['value']:,.0f} TFLOP/s)"
+        # Tier-3 row sits on the x-axis; nudge the label up so the spine
+        # does not bisect the text.
+        y_ann = y[i] + (0.18 if e["tier"] == 3 else 0.0)
         ax.text(
-            baseline * 1.02, y[i], label,
+            baseline * 1.02, y_ann, label,
             va="center", ha="left", fontsize=9,
             color=TIER_COLORS[e["tier"]], fontweight="bold",
         )
@@ -349,6 +362,17 @@ def fig2_budget_threshold(
 # Figure 3 — Rank-stability heatmap
 # ---------------------------------------------------------------------------
 
+# Shorter y-axis / bump labels where full names crowd the rank spine
+# (must match `country_name` in sensitivity data).
+_FIG3_LABEL_SHORT: dict[str, str] = {
+    "United Kingdom": "UK",
+    "United Arab Emirates": "UAE",
+}
+
+
+def _fig3_country_label(full_name: str) -> str:
+    return _FIG3_LABEL_SHORT.get(full_name, full_name)
+
 
 def fig3_rank_stability(
     sensitivity_data: list[dict],
@@ -453,23 +477,44 @@ def fig3_rank_stability(
             markeredgewidth=1.6, zorder=z,
         )
 
-    # Country labels on left and right sides, right next to each line's
-    # endpoint so the reader can identify them without a legend.
+    # Country labels at left/right of the bump chart. Anchor to the
+    # first/last x positions in *offset points* (not a fixed data x) so
+    # every name sits the same distance from the data columns and long
+    # names (e.g. United States) do not share space with the rank ticks.
     n = len(countries)
+    x_ppp, x_end = 0, len(methods) - 1
+    label_offset_pt = 9
     for c in countries:
         left_rank = rankings["ppp"][c]
         right_rank = rankings[methods[-1]][c]
         color = movers.get(c, "#555")
         weight = "bold" if c in movers else "normal"
-        ax_rank.text(
-            -0.12, left_rank, c,
-            va="center", ha="right",
-            fontsize=9.5, color=color, fontweight=weight,
+        name_disp = _fig3_country_label(c)
+        ax_rank.annotate(
+            name_disp,
+            xy=(x_ppp, left_rank),
+            xytext=(-label_offset_pt, 0),
+            textcoords="offset points",
+            ha="right",
+            va="center",
+            fontsize=9.5,
+            color=color,
+            fontweight=weight,
+            zorder=6,
+            clip_on=False,
         )
-        ax_rank.text(
-            len(methods) - 1 + 0.12, right_rank, c,
-            va="center", ha="left",
-            fontsize=9.5, color=color, fontweight=weight,
+        ax_rank.annotate(
+            name_disp,
+            xy=(x_end, right_rank),
+            xytext=(label_offset_pt, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize=9.5,
+            color=color,
+            fontweight=weight,
+            zorder=6,
+            clip_on=False,
         )
 
     ax_rank.set_xticks(x_positions)
@@ -477,7 +522,7 @@ def fig3_rank_stability(
     ax_rank.set_yticks(range(1, n + 1))
     ax_rank.set_yticklabels([f"#{i}" for i in range(1, n + 1)])
     ax_rank.set_ylim(n + 0.5, 0.5)  # rank #1 at top
-    ax_rank.set_xlim(-0.9, len(methods) - 1 + 0.9)
+    ax_rank.set_xlim(-1.15, x_end + 1.1)
     ax_rank.set_ylabel("Rank  (#1 = best access, #9 = worst)", fontsize=10)
     ax_rank.set_title(
         "How each country's access rank changes when you swap economic yardsticks",
@@ -515,7 +560,7 @@ def fig3_rank_stability(
                 )
 
     ax_val.set_yticks(y_positions)
-    ax_val.set_yticklabels(countries)
+    ax_val.set_yticklabels([_fig3_country_label(c) for c in countries])
     # countries is ordered worst → best (Nigeria, ..., USA).  With
     # y_positions = np.arange(N) and a non-inverted axis, y=0 lands at the
     # bottom and y=N-1 at the top, which puts USA at the top — matching
@@ -622,11 +667,19 @@ def fig4_gpu_class_effect(
                    edgecolor="white", linewidth=1.2,
                    label="A100 SXM4 @ $10K" if i == 0 else "")
 
-        # Value annotations (small, to the right of each marker).
-        ax.text(r["h100"], y[i] + 0.22, f"{r['h100']:,.0f}",
-                ha="center", fontsize=8, color=tc)
-        ax.text(r["a100"], y[i] - 0.28, f"{r['a100']:,.0f}",
-                ha="center", fontsize=8, color=tc)
+        # Value annotations (small, near each marker). Bottom row: A100
+        # label above the circle (below would meet the x-axis); H100 uses
+        # the same +0.22 offset as every other row's square label.
+        if i == 0:
+            ax.text(r["h100"], y[i] + 0.22, f"{r['h100']:,.0f}",
+                    ha="center", fontsize=8, color=tc)
+            ax.text(r["a100"], y[i] + 0.12, f"{r['a100']:,.0f}",
+                    ha="center", fontsize=8, color=tc)
+        else:
+            ax.text(r["h100"], y[i] + 0.22, f"{r['h100']:,.0f}",
+                    ha="center", fontsize=8, color=tc)
+            ax.text(r["a100"], y[i] - 0.28, f"{r['a100']:,.0f}",
+                    ha="center", fontsize=8, color=tc)
 
     ax.set_yticks(y)
     ax.set_yticklabels([r["name"] for r in rows])
