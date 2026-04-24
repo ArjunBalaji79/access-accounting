@@ -2,7 +2,7 @@
 
 **A Framework for Measuring and Reporting AI Compute Availability for Governance**
 
-Submitted to TAIGR @ ICML 2026
+
 
 ---
 
