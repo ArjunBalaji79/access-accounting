@@ -2,8 +2,7 @@
 
 **A Framework for Measuring and Reporting AI Compute Availability for Governance**
 
-SIPA AI Club Research Team | Columbia University  
-Submitted to TAIGR @ ICML 2026 (Seoul, South Korea)
+Submitted to TAIGR @ ICML 2026
 
 ---
 
@@ -102,17 +101,3 @@ All inputs are publicly verifiable. See `data/README.md` for exact sourcing inst
 | GPU specs | NVIDIA official datasheets |
 | BIS export tiers | Federal Register 90 FR 4544 |
 
-## Citation
-
-```bibtex
-@inproceedings{accessaccounting2026,
-  title={Access Accounting: A Framework for Measuring and Reporting AI Compute Availability for Governance},
-  author={SIPA AI Club Research Team},
-  booktitle={TAIGR Workshop @ ICML 2026},
-  year={2026}
-}
-```
-
-## License
-
-MIT
